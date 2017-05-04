@@ -6,6 +6,7 @@ import sys
 from tkinter.messagebox import showerror
 import os
 import json
+import subprocess
 
 def program_edison():
     current_editor = get_workbench().get_editor_notebook().get_current_editor()
@@ -23,6 +24,7 @@ def program_edison():
     
     wav_filename = _compile_script(py_file)
     print(wav_filename)
+    # TODO: get duration and set up a progress bar
     _play_wav(wav_filename)
     os.remove(wav_filename)
     
@@ -33,15 +35,29 @@ def _play_wav(path):
     if os.name == "nt":
         import winsound
         winsound.PlaySound(path, winsound.SND_FILENAME)
+    elif sys.platform == "darwin":
+        # http://stackoverflow.com/a/3498622/261181
+        subprocess.call(["afplay", path])
     else:
-        raise RuntimeError("Only windows supported at the moment")
+        # https://www.techwalla.com/articles/how-to-play-a-wav-file-in-python
+        subprocess.call(["aplay", path])
+        raise RuntimeError("Only mac and windows supported at the moment")
+
+def _get_wav_duration(path):
+    # http://stackoverflow.com/questions/7833807/get-wav-file-length-or-duration
+    import wave
+    import contextlib
+    with contextlib.closing(wave.open(path,'r')) as f:
+        frames = f.getnframes()
+        rate = f.getframerate()
+        duration = frames / float(rate)
+        return duration
 
 def program_edison_enabled():
     code = _get_current_code()
     return code is not None and code.strip() != ""
 
 def _compile_script(script_path):
-    import subprocess
     exe = sys.executable.replace("thonny.exe", "pythonw.exe") # TODO: ask from runner
     
     edpy_dir = os.path.join(os.path.dirname(__file__), "EdPy")
