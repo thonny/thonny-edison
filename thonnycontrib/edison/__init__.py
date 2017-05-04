@@ -23,9 +23,18 @@ def program_edison():
     
     wav_filename = _compile_script(py_file)
     print(wav_filename)
+    _play_wav(wav_filename)
+    os.remove(wav_filename)
     
     # TODO: play wav
     # TODO: delete wav
+
+def _play_wav(path):
+    if os.name == "nt":
+        import winsound
+        winsound.PlaySound(path, winsound.SND_FILENAME)
+    else:
+        raise RuntimeError("Only windows supported at the moment")
 
 def program_edison_enabled():
     code = _get_current_code()
