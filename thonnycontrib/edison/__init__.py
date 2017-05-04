@@ -47,7 +47,7 @@ def _get_wav_duration(path):
     # http://stackoverflow.com/questions/7833807/get-wav-file-length-or-duration
     import wave
     import contextlib
-    with contextlib.closing(wave.open(path,'r')) as f:
+    with wave.open(path,'r') as f:
         frames = f.getnframes()
         rate = f.getframerate()
         duration = frames / float(rate)
