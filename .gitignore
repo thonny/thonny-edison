@@ -1,3 +1,6 @@
 *.wav
 __pycache__
 *.pyc
+build
+dist
+thonny_edison.egg-info
