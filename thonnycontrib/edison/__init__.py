@@ -7,6 +7,47 @@ from tkinter.messagebox import showerror
 import os
 import json
 import subprocess
+from thonny.running import BackendProxy
+from thonny.misc_utils import running_on_windows
+import collections
+import signal
+import threading
+
+class EdisonProxy(BackendProxy):
+    @classmethod
+    def get_configuration_options(cls):
+        return [""]
+    
+    def __init__(self, configuration_option):
+        self._message_queue = collections.deque()
+        self._flasher = None
+
+    def supported_features(self):
+        return []
+
+    def get_description(self):
+        return "Edison"        
+
+    def send_command(self, cmd):
+        if cmd.command == "Flash":
+            proc = subprocess.Popen # TODO:
+            self._flasher = SubprocessRunner(proc, self._message_queue)
+            
+        return False
+    
+    def fetch_next_message(self):
+        if len(self._message_queue) == 0:
+            return None
+        
+        event_type, data = self._flasher.event_queue.popleft()
+        if event_type in ["stdout", "stderr"]:
+            return {"message_type" : "ProgramOutput",
+                    "stream_name" : event_type,
+                    "data" : data}
+        else:
+            assert event_type == "returncode"
+            return {"message_type" : "ToplevelResult"}
+        
 
 def program_edison():
     current_editor = get_workbench().get_editor_notebook().get_current_editor()
@@ -78,6 +119,67 @@ def _get_current_code():
     if editor is None:
         return None
     return editor.get_code_view().text.get("1.0", "end")
+
+class SubprocessRunner:
+    """Publishes incrementally the output of given subprocess in a queue.
+    Allows cancelling"""
+    
+    def __init__(self, proc, event_queue=None):
+        self._proc = proc
+        self.stdout = ""
+        self.stderr = ""
+        self._stdout_thread = None
+        self._stderr_thread = None
+        self.returncode = None
+        self.cancelled = False
+        if event_queue is not None:
+            self.event_queue = event_queue
+        else:
+            self.event_queue = collections.deque()
+       
+        def listen_stream(stream_name):
+            stream = getattr(self._proc, stream_name)
+            while True:
+                data = stream.readline()
+                self.event_queue.append((stream_name, data))
+                setattr(self, stream_name, getattr(self, stream_name) + data)
+                if data == '':
+                    break
+            
+            self.returncode = self._proc.wait()
+            self.event_queue.append("returncode", self.returncode)
+        
+        self._stdout_thread = threading.Thread(target=listen_stream, args=["stdout"])
+        self._stdout_thread.start()
+        if self._proc.stderr is not None:
+            self._stderr_thread = threading.Thread(target=listen_stream, args=["stderr"])
+            self._stderr_thread.start()
+        
+    def cancel(self):
+        if self._proc.poll() is None:
+            try:
+                if running_on_windows():
+                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
+                else:
+                    os.kill(self._proc.pid, signal.SIGINT)
+                    
+                self._proc.wait(2)
+            except subprocess.TimeoutExpired:
+                if self._proc.poll() is None:
+                    # now let's be more concrete
+                    self._proc.kill()
+            
+            
+            self.cancelled = True
+            # Wait for threads to finish
+            self._stdout_thread.join(2)
+            if self._stderr_thread is not None:
+                self._stderr_thread.join(2)
+                    
+
+
+def load_early_plugin():
+    get_workbench().add_backend("Edison", EdisonProxy)    
 
 def load_plugin():
     image_path = os.path.join(os.path.dirname(__file__), "res", "tools.program_edison.gif")
