@@ -7,7 +7,9 @@ import subprocess
 import math
 import time
 import threading
+import shutil
 
+_completion_msg = "Done! Disconnect Edison and press its triangle button."
 
 def _compile_script(script_path):
     print("Compiling", script_path, "...")
@@ -46,7 +48,8 @@ def program_edison(cmd):
 
     if wav_path:
         wav_length = _get_wav_duration(wav_path)
-        input("Press ENTER to start programming (%d seconds): " % wav_length)
+        print("Connect your Edison, turn volume to maximum and press the round button.")
+        input("Press ENTER to start programming (%d seconds) " % wav_length)
         print("Programming ...")
         progress_thread = None
         completion_box = [False]
@@ -61,7 +64,7 @@ def program_edison(cmd):
             progress_thread.join()
         
         if not tty_mode:
-            print("Done!")
+            print(_completion_msg)
 
         os.remove(wav_path)
 
@@ -84,7 +87,7 @@ def _show_progress_bar(sec, length, completion_box):
             print_bar(progress)
             time.sleep(1)
 
-        print("\r" + "Done!".ljust(length, " "))
+        print("\r" + _completion_msg.ljust(length, " "))
 
     t = threading.Thread(target=work)
     t.start()
@@ -94,7 +97,6 @@ def _show_progress_bar(sec, length, completion_box):
 def _play_wav(path):
     if os.name == "nt":
         import winsound
-
         winsound.PlaySound(path, winsound.SND_FILENAME)
     elif sys.platform == "darwin":
         # http://stackoverflow.com/a/3498622/261181
