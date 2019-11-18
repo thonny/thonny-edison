@@ -11,6 +11,7 @@ import shutil
 
 _completion_msg = "Done! Disconnect Edison and press its triangle button!"
 
+
 def _compile_script(script_path):
     print("Compiling", script_path, "...")
     edpy_dir = os.path.join(os.path.dirname(__file__), "EdPy")
@@ -53,7 +54,7 @@ def program_edison(cmd):
         print("Programming ...")
         progress_thread = None
         completion_box = [None]
-        tty_mode = cmd.get("tty_mode", False) 
+        tty_mode = cmd.get("tty_mode", False)
         if tty_mode:
             progress_thread = _show_progress_bar(
                 math.ceil(wav_length), 50, completion_box
@@ -62,7 +63,7 @@ def program_edison(cmd):
         completion_box[0] = success
         if progress_thread:
             progress_thread.join()
-        
+
         if not tty_mode and success:
             print(_completion_msg)
 
@@ -70,23 +71,22 @@ def program_edison(cmd):
 
 
 def _show_progress_bar(sec, length, completion_box):
-    
     def print_bar(progress):
         completed_blocks = int(progress * length)
         remaining_blocks = length - completed_blocks
 
         print("\r" + ("■" * completed_blocks) + ("□" * remaining_blocks), end=" ")
-        
+
     def work():
         print("Starting", end="")
         for i in range(sec):
             if completion_box[0] is not None:
                 break
-            
+
             progress = min(i / sec, 1)
             print_bar(progress)
             time.sleep(1)
-        
+
         if completion_box[0]:
             print("\r" + _completion_msg.ljust(length, " "))
         else:
@@ -100,6 +100,7 @@ def _show_progress_bar(sec, length, completion_box):
 def _play_wav(path):
     if os.name == "nt":
         import winsound
+
         winsound.PlaySound(path, winsound.SND_FILENAME)
         return True
     elif sys.platform == "darwin":
@@ -112,7 +113,10 @@ def _play_wav(path):
             subprocess.check_call(["aplay", "-q", path])
             return True
         else:
-            print("Command 'aplay' not found. Try installing 'alsa-utils' with your system package manager!")
+            print(
+                "Command 'aplay' not found. Try installing 'alsa-utils' with your system package manager!",
+                file=sys.stderr,
+            )
             return False
 
 
