@@ -1,4 +1,4 @@
-from thonny.globals import get_workbench
+from thonny import get_workbench, get_runner
 import tempfile
 import traceback
 import ast
@@ -49,7 +49,7 @@ class EdisonProxy(BackendProxy):
             return {"message_type" : "ToplevelResult"}
         
 
-def program_edison():
+def program_edison_old():
     current_editor = get_workbench().get_editor_notebook().get_current_editor()
     code = current_editor.get_text_widget().get("1.0", "end")
     try:
@@ -179,7 +179,10 @@ class SubprocessRunner:
 
 
 def load_early_plugin():
-    get_workbench().add_backend("Edison", EdisonProxy)    
+    get_workbench().add_basckend("Edison", EdisonProxy)    
+
+def program_edison():
+    get_runner().execute_current("ProgramEdison")
 
 def load_plugin():
     image_path = os.path.join(os.path.dirname(__file__), "res", "tools.program_edison.gif")
@@ -188,5 +191,6 @@ def load_plugin():
                                 program_edison_enabled,
                                 #default_sequence="<Control-e>",
                                 group=120,
-                                image_filename=image_path,
+                                image=image_path,
+                                caption="Program Edison",
                                 include_in_toolbar=True)

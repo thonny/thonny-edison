@@ -3,6 +3,7 @@
 	<name>thonny-edison</name>
 	<comment></comment>
 	<projects>
+		<project>thonny</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
