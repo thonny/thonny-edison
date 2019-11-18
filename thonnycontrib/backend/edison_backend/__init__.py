@@ -9,7 +9,7 @@ import time
 import threading
 import shutil
 
-_completion_msg = "Done! Disconnect Edison and press its triangle button."
+_completion_msg = "Done! Disconnect Edison and press its triangle button!"
 
 def _compile_script(script_path):
     print("Compiling", script_path, "...")
