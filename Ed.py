@@ -143,6 +143,9 @@ Tempo = TEMPO_MEDIUM
 DistanceUnits = None
 EdisonVersion = None   
 
+def _explain():
+    raise RuntimeError("\n\nYou can't simply run Edison program like this.\n"
+                       + "Use 'Tools => Send current script to Edison' instead!")
 
 def List(size, initialList=None):
     """Parameters:
@@ -212,6 +215,7 @@ example, the following code would flash Edison's LED once.
         example[0]=example[0]-1
 
 """
+    _explain()
 
 def LeftLed(state):
     """Parameters:
@@ -263,6 +267,7 @@ in the code to turn Edison's LED off.
 
 
 """
+    _explain()
 
 def RightLed(state):
     """Parameters:
@@ -316,6 +321,7 @@ Watch out for:
 ****
 
 """
+    _explain()
 
 def ObstacleDetectionBeam(state):
     """Parameters:
@@ -364,6 +370,7 @@ other Edisons if the obstacle detection beam is turned on.
 ****
 
 """
+    _explain()
 
 def LineTrackerLed(state):
     """Parameters:
@@ -413,6 +420,7 @@ will therefore never return the LINE\_ON\_BLACK condition.
 ****
 
 """
+    _explain()
 
 def SendIRData(Byte):
     """Parameters:
@@ -463,6 +471,7 @@ Watch out for:
 ****
 
 """
+    _explain()
 
 def RegisterEventHandler(event, function):
     """Parameters:
@@ -561,6 +570,7 @@ the main program is paused while the given function is run.
 ****
 
 """
+    _explain()
 
 def PlayBeep():
     """Parameters:
@@ -599,6 +609,7 @@ loop.
 ****
 
 """
+    _explain()
 
 def PlayMyBeep(pulses):
     """Parameters:
@@ -649,6 +660,7 @@ numbers to your program.
 ****
 
 """
+    _explain()
 
 def PlayTune(Tune):
     """Parameters:
@@ -767,6 +779,7 @@ setup.
 ****
 
 """
+    _explain()
 
 def TuneString(size, initialTune=None):
     """Parameters:
@@ -886,6 +899,7 @@ You can change the speed you tune plays by changing the Ed.Tempo in the
 setup.
 
 """
+    _explain()
 
 def Drive(direction,speed,distance):
     """Parameters:
@@ -1037,6 +1051,7 @@ stop or change the direction of movement.
 | 
 
 """
+    _explain()
 
 def DriveLeftMotor(direction, speed, distance):
     """Parameters:
@@ -1158,6 +1173,7 @@ with the code, an additional Ed.Drive will be required later in the code
 to stop or change the direction of movement.
 
 """
+    _explain()
 
 def DriveRightMotor(direction, speed, distance):
     """Parameters:
@@ -1279,6 +1295,7 @@ with the code, an additional Ed.Drive will be required later in the code
 to stop or change the direction of movement.
 
 """
+    _explain()
 
 def ReadObstacleDetection():
     """Parameters:
@@ -1356,6 +1373,7 @@ a detection from before the read function is called in your code.
 The read function clears the obstacle detection state.
 
 """
+    _explain()
 
 def ReadKeypad():
     """Parameters:
@@ -1420,6 +1438,7 @@ Watch out for:
 The read function clears the keypad state after reading it.
 
 """
+    _explain()
 
 def ReadClapSensor():
     """Parameters:
@@ -1491,6 +1510,7 @@ finished.
 
 
 """
+    _explain()
 
 def ReadLineState():
     """Parameters:
@@ -1547,6 +1567,7 @@ not on a white surface when the line tracker LED is turned on Edison
 will be unable to find black surfaces.
 
 """
+    _explain()
 
 def ReadRemote():
     """Parameters:
@@ -1627,6 +1648,7 @@ function is called in your code.
 The read function clears the remote control register.
 
 """
+    _explain()
 
 def ReadIRData():
     """Parameters:
@@ -1671,6 +1693,7 @@ is called in your code.
 The read function clears the data received register.
 
 """
+    _explain()
 
 def ReadLeftLightLevel():
     """Parameters:
@@ -1711,6 +1734,7 @@ the returned value can be between 0 and 32767.
 
 
 """
+    _explain()
 
 def ReadRightLightLevel():
     """Parameters:
@@ -1749,6 +1773,7 @@ Edison reads the light level using an analogue to digital converter, so
 the returned value can be between 0 and 32767.
 
 """
+    _explain()
 
 def ReadLineTracker():
     """Parameters:
@@ -1796,6 +1821,7 @@ is reccommended to turn on the Line Tracking LED before using this read
 function.
 
 """
+    _explain()
 
 def ReadCountDown(units):
     """Parameters:
@@ -1849,6 +1875,7 @@ whereas reading the timer in Milliseconds will read fine (returning 800
 for our previous example).
 
 """
+    _explain()
 
 def ReadMusicEnd():
     """Parameters:
@@ -1897,6 +1924,7 @@ You can change the speed you tune plays by changing the Ed.Tempo in the
 setup.
 
 """
+    _explain()
 
 def ReadDriveLoad():
     """Parameters:
@@ -1939,6 +1967,7 @@ DRIVE\_STRAINED condition, when driving a single wheel, only strain on
 the moving wheel will trigger the DRIVE\_STRAINED condition.
 
 """
+    _explain()
 
 def ReadDistance(side):
     """Parameters:
@@ -1985,6 +2014,7 @@ This function is only compatible with Edison V2.0.
 Reads values in ticks, a tick is 1.25mm.
 
 """
+    _explain()
 
 def SetDistance(side, ticks):
     """Parameters:
@@ -2039,6 +2069,7 @@ This function is only compatible with Edison V2.0.
 Sets values in ticks, a tick is 1.25mm.
 
 """
+    _explain()
 
 def ResetDistance():
     """Parameters:
@@ -2085,4 +2116,5 @@ This function is only compatible with Edison V2.0.
 Resets values in ticks, a tick is 1.25mm.
 
 """
+    _explain()
 

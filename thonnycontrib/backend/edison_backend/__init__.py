@@ -1,72 +1,119 @@
-from thonny.backend import get_vm, Executor, prepare_hooks, return_execution_result
+from thonny.backend import get_vm
 
 import sys
+import json
 import os.path
 import subprocess
-
-from thonny.common import get_augmented_system_path, get_exe_dirs, update_system_path
-from threading import Thread
+import math
+import time
+import threading
 
 
 def _compile_script(script_path):
+    print("Compiling", script_path, "...")
     edpy_dir = os.path.join(os.path.dirname(__file__), "EdPy")
     edpy_script = os.path.join(edpy_dir, "EdPy.py")
     lang_file = os.path.join(edpy_dir, "en_lang.json")
-    _execute_system_command([sys.executable, edpy_script, lang_file, script_path])
-
-
-def _execute_system_command(cmd, cwd=None):
-    env = dict(os.environ).copy()
-    encoding = "utf-8"
-    env["PYTHONIOENCODING"] = encoding
-    # Make sure this python interpreter and its scripts are available
-    # in PATH
-    update_system_path(env, get_augmented_system_path(get_exe_dirs()))
-    popen_kw = dict(
+    proc = subprocess.Popen(
+        [sys.executable, edpy_script, lang_file, script_path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        shell=False,
-        env=env,
         universal_newlines=True,
-        bufsize=0,
     )
+    proc.wait()
 
-    if cwd and os.path.isdir(cwd):
-        popen_kw["cwd"] = cwd
+    out = proc.stdout.read()
+    err = proc.stderr.read()
+    if err:
+        print(err, file=sys.stderr)
 
-    if sys.version_info >= (3, 6):
-        popen_kw["errors"] = "replace"
-        popen_kw["encoding"] = encoding
+    result = json.loads(out)
 
-    proc = subprocess.Popen(cmd, **popen_kw)
+    if result["error"]:
+        print("Errors:", file=sys.stderr)
+        for msg in result["messages"]:
+            print(msg, file=sys.stderr)
 
-    def copy_stream(source, target):
-        while True:
-            c = source.readline()
-            if c == "":
-                break
-            else:
-                target.write(c)
-                target.flush()
-
-    copy_out = Thread(target=lambda: copy_stream(proc.stdout, sys.stdout), daemon=True)
-    copy_err = Thread(target=lambda: copy_stream(proc.stderr, sys.stderr), daemon=True)
-
-    copy_out.start()
-    copy_err.start()
-    try:
-        proc.wait()
-    except KeyboardInterrupt as e:
-        print(str(e), file=sys.stderr)
-
-    copy_out.join()
-    copy_err.join()
+        return None
+    else:
+        print("Compilation successful!")
+        return result["wavFilename"]
 
 
 def program_edison(cmd):
-    script_path = os.path.normpath(os.path.join(cmd["local_cwd"], cmd["args"][0])) 
-    print("PRO", script_path)
-    _compile_script(script_path)
+    script_path = os.path.normpath(os.path.join(cmd["local_cwd"], cmd["args"][0]))
+    wav_path = _compile_script(script_path)
+
+    if wav_path:
+        wav_length = _get_wav_duration(wav_path)
+        input("Press ENTER to start programming (%d seconds): " % wav_length)
+        print("Programming ...")
+        progress_thread = None
+        completion_box = [False]
+        tty_mode = cmd.get("tty_mode", False) 
+        if tty_mode:
+            progress_thread = _show_progress_bar(
+                math.ceil(wav_length), 50, completion_box
+            )
+        _play_wav(wav_path)
+        completion_box[0] = True
+        if progress_thread:
+            progress_thread.join()
+        
+        if not tty_mode:
+            print("Done!")
+
+        os.remove(wav_path)
+
+
+def _show_progress_bar(sec, length, completion_box):
+    
+    def print_bar(progress):
+        completed_blocks = int(progress * length)
+        remaining_blocks = length - completed_blocks
+
+        print("\r" + ("■" * completed_blocks) + ("□" * remaining_blocks), end=" ")
+        
+    def work():
+        print("Starting", end="")
+        for i in range(sec):
+            if completion_box[0]:
+                break
+            
+            progress = min(i / sec, 1)
+            print_bar(progress)
+            time.sleep(1)
+
+        print("\r" + "Done!".ljust(length, " "))
+
+    t = threading.Thread(target=work)
+    t.start()
+    return t
+
+
+def _play_wav(path):
+    if os.name == "nt":
+        import winsound
+
+        winsound.PlaySound(path, winsound.SND_FILENAME)
+    elif sys.platform == "darwin":
+        # http://stackoverflow.com/a/3498622/261181
+        subprocess.check_call(["afplay", path])
+    else:
+        # https://www.techwalla.com/articles/how-to-play-a-wav-file-in-python
+        subprocess.check_call(["aplay", path])
+
+
+def _get_wav_duration(path):
+    # http://stackoverflow.com/questions/7833807/get-wav-file-length-or-duration
+    import wave
+    import contextlib
+
+    with wave.open(path, "r") as f:
+        frames = f.getnframes()
+        rate = f.getframerate()
+        duration = frames / float(rate)
+        return duration
 
 
 def load_plugin():
