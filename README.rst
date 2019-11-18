@@ -6,7 +6,7 @@ This is a plug-in for `Thonny IDE <https://thonny.org>`_, which adds possibility
 Usage
 ------
 
-#. Install Thonny 2.3 or later
+#. Install Thonny 3.2 or later
 #. Select Tools => Manage plug-ins...
 #. enter ``thonny-edison`` to search box and press ENTER
 #. Install the plug-in
