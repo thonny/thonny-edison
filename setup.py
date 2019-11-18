@@ -13,7 +13,8 @@ setup(
     name="thonny-edison",
     version="1.0.0b8",
     description="A plug-in which adds Edison robot support for Thonny",
-    long_description="""This is a plug-in for Thonny which adds Edison robot support. 
+    long_description="""Plug-in for Thonny which adds Edison robot support.
+ 
 More info: https://github.com/thonny/thonny-edison/""",
     url="https://github.com/thonny/thonny-edison/",
     author="Aivar Annamaa",
