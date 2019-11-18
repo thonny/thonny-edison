@@ -11,7 +11,7 @@ for line in open(os.path.join(setupdir, "requirements.txt"), encoding="UTF-8"):
 
 setup(
     name="thonny-edison",
-    version="1.0b4",
+    version="1.0b5",
     description="A plug-in which adds Edison robot support for Thonny",
     long_description="""This is a plug-in for Thonny which adds Edison robot support. 
 More info about Thonny: https://thonny.org.""",
