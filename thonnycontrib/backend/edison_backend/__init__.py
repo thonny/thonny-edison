@@ -33,14 +33,31 @@ def _compile_script(script_path):
     result = json.loads(out)
 
     if result["error"]:
-        print("Errors:", file=sys.stderr)
+        print()
         for msg in result["messages"]:
-            print(msg, file=sys.stderr)
+            print(_transform_error_msg(msg, script_path), file=sys.stderr)
 
         return None
     else:
         print("Compilation successful!")
         return result["wavFilename"]
+
+
+def _transform_error_msg(msg, file_path):
+    parts = list(map(str.strip, msg.split(":", maxsplit=4)))
+    if (
+        len(parts) == 5
+        and parts[0] == "ERR"
+        and parts[1] == "file"
+        and parts[2].isnumeric()
+    ):
+        lineno = int(parts[2])
+        if lineno > 0:
+            return parts[-1] + '\n  File "{}", line {}'.format(file_path, lineno)
+        else:
+            return parts[-1]
+    else:
+        return msg
 
 
 def program_edison(cmd):
@@ -70,22 +87,29 @@ def program_edison(cmd):
         os.remove(wav_path)
 
 
-def _show_progress_bar(sec, length, completion_box):
-    def print_bar(progress):
-        completed_blocks = int(progress * length)
-        remaining_blocks = length - completed_blocks
-
-        print("\r" + ("■" * completed_blocks) + ("□" * remaining_blocks), end=" ")
-
+def _show_progress_bar(seconds, length, completion_box):
     def work():
         print("Starting", end="")
-        for i in range(sec):
+
+        start_time = time.time()
+        prev_completed_blocks = -1
+        while True:
             if completion_box[0] is not None:
                 break
 
-            progress = min(i / sec, 1)
-            print_bar(progress)
-            time.sleep(1)
+            elapsed = time.time() - start_time
+            progress = min(elapsed / seconds, 1)
+
+            completed_blocks = int(progress * length)
+            remaining_blocks = length - completed_blocks
+
+            if completed_blocks != prev_completed_blocks:
+                print(
+                    "\r" + ("■" * completed_blocks) + ("□" * remaining_blocks), end=" "
+                )
+                prev_completed_blocks = completed_blocks
+
+            time.sleep(0.1)
 
         if completion_box[0]:
             print("\r" + _completion_msg.ljust(length, " "))
@@ -114,7 +138,8 @@ def _play_wav(path):
             return True
         else:
             print(
-                "Command 'aplay' not found. Try installing 'alsa-utils' with your system package manager!",
+                "\nCommand 'aplay' not found. "
+                + "Try installing 'alsa-utils' with your system package manager!",
                 file=sys.stderr,
             )
             return False
@@ -123,13 +148,9 @@ def _play_wav(path):
 def _get_wav_duration(path):
     # http://stackoverflow.com/questions/7833807/get-wav-file-length-or-duration
     import wave
-    import contextlib
 
     with wave.open(path, "r") as f:
-        frames = f.getnframes()
-        rate = f.getframerate()
-        duration = frames / float(rate)
-        return duration
+        return f.getnframes() / f.getframerate()
 
 
 def load_plugin():
