@@ -8,14 +8,18 @@ using `EdPy library <https://github.com/Bdanilko/EdPy/>`_.
 
 In other words -- it's an off-line replacement for https://www.edpyapp.com/. 
 
-Usage
-------
-
+Installation
+------------
 #. Install Thonny 3.2 or later
-#. Select Tools => Manage plug-ins...
+#. Select "Tools => Manage plug-ins"...
 #. enter ``thonny-edison`` to search box and press ENTER
 #. Install the plug-in
 #. Restart Thonny
 
 After this you should see Edison programming command in Tools menu
 
+Usage
+-----
+* Save Edison scripts as local py-files.
+* Autocomplete is available on ``Ed``-module. 
+* When you are done, use "Tools => Send current script to Edison".
