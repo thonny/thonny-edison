@@ -1,4 +1,9 @@
-from thonny.backend import get_vm
+try:
+    # Since Thonny 3.3
+    from thonny.plugins.cpython.cpython_backend import get_backend
+except ImportError:
+    # Thonny 3.2
+    from thonny.backend import get_vm as get_backend
 
 import sys
 import json
@@ -154,4 +159,4 @@ def _get_wav_duration(path):
 
 
 def load_plugin():
-    get_vm().add_command("ProgramEdison", program_edison)
+    get_backend().add_command("ProgramEdison", program_edison)

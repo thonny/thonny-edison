@@ -4,3 +4,5 @@ __pycache__
 build
 dist
 thonny_edison.egg-info
+.idea
+venv
