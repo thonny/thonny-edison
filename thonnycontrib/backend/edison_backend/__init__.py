@@ -17,6 +17,9 @@ import math
 import time
 import threading
 import shutil
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 _completion_msg = "Done! Disconnect Edison and press its triangle button!"
 
@@ -39,6 +42,7 @@ def _compile_script(script_path):
     if err:
         print(err, file=sys.stderr)
 
+    logger.info("edpy subprocess output: %s", out)
     result = json.loads(out)
 
     if result["error"]:

@@ -86,7 +86,7 @@ def main(args):
                 full_download_bytes.extend(dBytes)
                 # print(len(full_download_bytes))
 
-                LOG.log("WAV size:{:d} ver:{:d} name:{:s}".format(len(full_download_bytes),
+                LOG.log("WAV size:{} ver:{} name:{}".format(len(full_download_bytes),
                                                                       versionNumber,
                                                                       a.GetWavPath()))
 
@@ -256,14 +256,14 @@ if __name__ == '__main__':
 
     except Exception as e:
         # if we fail, that's ok - but not good
-        totalOutput += "LOG EXC:{:s}".format(e)
+        totalOutput += "LOG EXC:{}".format(e)
 
 
     if (m is not None):
-        LOG.log("END rtc:{:d} INTERNAL ERROR output:|{:s}|\n".format(rtc, totalOutput))
-        LOG.log("PRG {:s}".format(totalProgram))
+        LOG.log("END rtc:{} INTERNAL ERROR output:|{}|\n".format(rtc, totalOutput))
+        LOG.log("PRG {}".format(totalProgram))
     else:
-        LOG.log("END rtc:{:d} output:|{:s}|\n".format(rtc, totalOutput))
+        LOG.log("END rtc:{} output:|{}|\n".format(rtc, totalOutput))
     LOG.close()
 
     io.Out.Flush()

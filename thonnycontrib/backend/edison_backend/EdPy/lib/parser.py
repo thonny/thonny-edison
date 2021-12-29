@@ -38,9 +38,9 @@ from . import edpy_code
 
 def Name(node):
     className = str(node.__class__)
-    match = re.match("\<class '_ast.([a-zA-Z]*)'\>.*", className)
+    match = re.match("\<class '_?ast.([a-zA-Z]*)'\>.*", className)
     if match is None:
-        io.Out.FatalRaw("ERROR - bad re")
+        io.Out.FatalRaw("ERROR - unexpected className " + className)
 
     return match.group(1)
 
@@ -94,13 +94,17 @@ def CheckSlice(node):
     nodeName = Name(node)
     if (nodeName == "Subscript"):
         # is it simple enough?
-        if ((Name(node.value) != "Name") or     # only support a name for the slice variable
-            (Name(node.slice) != "Index")):     # only support a simple index for the slice
+        if ((Name(node.value) != "Name")
+            #or     # only support a name for the slice variable
+            #(Name(node.slice) != "Index") # Newer Pythons don't use Index
+        ):     # only support a simple index for the slice
                                                 # though Index can be an expression
 
             io.Out.Error(io.TS.PARSE_TOO_COMPLEX,
-                         "file:{0}:{1}: Syntax Error, {2} code too complex for Ed.Py",
-                         node.lineno, node.col_offset, "ARRAY")
+                         "file:{0}:{1}: Syntax Error, {2} code too complex for Ed.Py "
+                         "(value: {3}, slice: {4})",
+                         node.lineno, node.col_offset, "ARRAY",
+                         type(node.value), type(node.slice))
             raise program.ParseError
         return True
     return False
@@ -169,7 +173,7 @@ def CheckFor(node):
 
 def CheckNum(node):
     # verify that this is an integer
-    if (Name(node) != "Num"):
+    if (Name(node) not in ["Num", "Constant"]):
         raise RuntimeError("CheckNum() called with wrong argument")
 
     # print("CheckNum with node:", node, "node.n:", node.n)
@@ -670,6 +674,16 @@ class Converter(object):
         io.Out.DebugRaw("Value:", nodeName, node.__dict__)
 
         # Handle all terminals first
+        if (nodeName == "Constant"):
+            # Appeared in Python 3.8(?)
+            if isinstance(node.value, int):
+                nodeName = "Num"
+                node.n = node.value
+            elif isinstance(node.value, str):
+                nodeName = "Str"
+                node.s = node.value
+            elif isinstance(node.value, bool):
+                nodeName = "NameConstant"
 
         if (nodeName == "Num"):
             CheckNum(node)
@@ -714,25 +728,37 @@ class Converter(object):
             # etc. but too hard. Code can be written to initialise each value if the programmer wants.
             listInit = []
             for e in node.elts:
-                if (Name(e) != "Num"):
+                if (Name(e) not in ["Num", "Constant"]):
                     io.Out.Error(io.TS.PARSE_TOO_COMPLEX,
                                  "file:{0}:{1}: Syntax Error, {2} code too complex for Ed.Py",
                                  node.lineno, node.col_offset, "LIST INIT")
                     raise program.ParseError
 
                 CheckNum(e)
-                listInit.append(e.n)
+                if Name(e) == "Constant":
+                    if isinstance(e.value, int):
+                        listInit.append(e.value)
+                    else:
+                        io.Out.Error(io.TS.PARSE_TOO_COMPLEX,
+                                     "file:{0}:{1}: Syntax Error, list can not contain {2}",
+                                     e.lineno, e.col_offset, type(e.value))
+                else:
+                    listInit.append(e.n)
 
             operand = program.Value(listConst=listInit)
             statementList.append(program.UAssign(target, "UAdd", operand))
 
         elif (nodeName == "Subscript"):
             CheckSlice(node)
-            # now know that the Name(node.value) == "Name" and Name(node.slice) == "Index"
+            # now know that the Name(node.value) == "Name" and Name(node.slice) in ["Index", "Name"]
             tempCount += 1
             operand = program.Value(name=node.value.id, iVariable=tempCount)
             # make another 1 or more assignment, return the next possible tempCount
-            tempCount = self.HandleExpr(node.slice.value, statementList, tempCount, lineNo)
+            if Name(node.slice) == "Index":
+                slice_value = node.slice.value
+            else:
+                slice_value = node.slice
+            tempCount = self.HandleExpr(slice_value, statementList, tempCount, lineNo)
             statementList.append(program.UAssign(target, "UAdd", operand))
 
         elif (nodeName == "UnaryOp"):
