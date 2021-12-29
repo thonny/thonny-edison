@@ -1,9 +1,13 @@
 try:
-    # Since Thonny 3.3
-    from thonny.plugins.cpython.cpython_backend import get_backend
+    # Since Thonny 4.0
+    from thonny.plugins.cpython_backend import get_backend
 except ImportError:
-    # Thonny 3.2
-    from thonny.backend import get_vm as get_backend
+    try:
+        # Since Thonny 3.3
+        from thonny.plugins.cpython.cpython_backend import get_backend
+    except ImportError:
+        # Thonny 3.2
+        from thonny.backend import get_vm as get_backend
 
 import sys
 import json
