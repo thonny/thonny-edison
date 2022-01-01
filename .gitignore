@@ -5,4 +5,5 @@ build
 dist
 thonny_edison.egg-info
 .idea
+.log
 venv
