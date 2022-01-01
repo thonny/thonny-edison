@@ -1,6 +1,7 @@
 import os.path
 import subprocess
 import json
+import sys
 
 edpy_dir = os.path.abspath(
     os.path.join(
@@ -13,7 +14,7 @@ for name in os.listdir(examples_dir):
     if name.endswith(".py"):
         try:
             args = [
-                "python3.9",
+                sys.executable,
                 os.path.join(edpy_dir, "EdPy.py"),
                 "-a",
                 os.path.join(examples_dir, name + ".asm"),
