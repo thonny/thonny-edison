@@ -29,7 +29,7 @@ MESSAGE_PAUSE = 4
 
 def endOfCalibrationSound():
     # crrrrr
-    count = 0
+    count = 0;
     while count < 10:
         Ed.PlayTone(5000, 80)
         Ed.PlayTone(100, 50)
@@ -42,7 +42,7 @@ def calibrateDensities():
         return
     tracker = Ed.ReadLineTracker()
     density[densityIndex] = tracker
-    Ed.PlayTone(tones[0], 200)
+    Ed.PlayTone(tones[0], 200);
     densityIndex = densityIndex + 1
 
 
@@ -60,9 +60,7 @@ def convertDensitiesToInterval():
         index = index + 1
 
     int = 0
-    while (
-        int < DENSITY_COUNT - 2
-    ):  # we have two white on calibration disc (second will be ignored)
+    while int < DENSITY_COUNT - 2:  # we have two white on calibration disc (second will be ignored)
         firstIndex = int + startIndex
         secondIndex = int + startIndex + 1
         if firstIndex > DENSITY_COUNT - 1:
@@ -75,7 +73,7 @@ def convertDensitiesToInterval():
 
 def readMessage():
     global processingLock
-    message = Ed.ReadIRData()
+    message = Ed.ReadIRData();
     if processingLock == 0:  # lock and ignore messages during processing
         processingLock = 1  # /
         if message == MESSAGE_EMPTY:  # ignore no message
@@ -120,10 +118,10 @@ def readMessage():
                             new_tone = 5
             if new_tone < 9:
                 Ed.PlayTone(100, 1)
-                Ed.TimeWait(30, Ed.TIME_MILLISECONDS)
-                Ed.PlayTone(tones[new_tone], 30000)
+                Ed.TimeWait(30, Ed.TIME_MILLISECONDS);
+                Ed.PlayTone(tones[new_tone], 30000);
             else:  # tone 9 = extend tone from last play = do nothing
-                Ed.TimeWait(30, Ed.TIME_MILLISECONDS)
+                Ed.TimeWait(30, Ed.TIME_MILLISECONDS);
             Ed.WriteModuleRegister8Bit(Ed.MODULE_LEFT_LED, Ed.REG_LED_OUTPUT_8, 0)
             Ed.WriteModuleRegister8Bit(Ed.MODULE_RIGHT_LED, Ed.REG_LED_OUTPUT_8, 0)
         Ed.ReadIRData()
@@ -131,7 +129,7 @@ def readMessage():
         processingLock = 0  # release lock
 
 
-Ed.RegisterEventHandler(Ed.EVENT_IR_DATA, "readMessage")
+Ed.RegisterEventHandler(Ed.EVENT_IR_DATA, "readMessage");
 processingLock = 0
 
 # calibration
@@ -141,7 +139,7 @@ while densityIndex < DENSITY_COUNT:
 endOfCalibrationSound()
 
 # convert densities to intervals
-convertDensitiesToInterval()
+convertDensitiesToInterval();
 
 Ed.WriteModuleRegister8Bit(Ed.MODULE_LEFT_LED, Ed.REG_LED_OUTPUT_8, 1)
 Ed.WriteModuleRegister8Bit(Ed.MODULE_RIGHT_LED, Ed.REG_LED_OUTPUT_8, 1)

@@ -44,34 +44,29 @@ def main(args):
     fileList = findPythonFiles(args.baseDir, args.s)
     errors = findTSUsages(fileList, uses, args)
 
-    if args.v > 0:
+    if (args.v > 0):
         print("\nTS strings:")
         for k in uses:
             total = 0
             for i in uses[k][2]:
                 total += int(i)
-            if args.v > 1:
+            if (args.v > 1):
                 print()
             print("    {0:>25}  |{1}|  (total uses:{2})".format(k, uses[k][0], total))
-            if args.v > 1:
+            if (args.v > 1):
                 for i in range(len(uses[k][1])):
-                    print(
-                        " " * 30,
-                        "used {1} times in file {0}".format(
-                            uses[k][1][i], uses[k][2][i]
-                        ),
-                    )
+                    print(" "*30, "used {1} times in file {0}".format(uses[k][1][i], uses[k][2][i]))
 
     # check if any of io.TS are not used, or they are bad values
     ts = io.TS.__dict__
     notUsed = ts.keys()
 
     for k in uses:
-        if k not in ts:
+        if (k not in ts):
             print("\nERROR - key {0} not in io.TS enumeration!".format(k))
             errors += 1
         else:
-            if k in notUsed:
+            if (k in notUsed):
                 notUsed.remove(k)
 
     if notUsed:
@@ -79,25 +74,24 @@ def main(args):
         for k in notUsed:
             print("    {0}".format(k))
 
-    if args.v > 0:
-        if errors == 0:
+    if (args.v > 0):
+        if (errors == 0):
             print("\nNo inconsistent use of translation strings found")
     return errors
-
 
 def findTSUsages(fileList, uses, args):
     errorList = []
     for f in fileList:
-        if args.v > 2:
+        if (args.v > 2):
             print("Searching file:", f)
-        fh = open(f, "rb")
+        fh = open(f, 'rb')
         lines = fh.readlines()
         fh.close()
 
         fileData = ""
 
         for l in lines:
-            line = l.strip(" \t\r\n\v")
+            line = l.strip(' \t\r\n\v')
             fileData += line
         # print(fileData)
 
@@ -110,22 +104,18 @@ def findTSUsages(fileList, uses, args):
             key = m.group(1)
             value = m.group(3)
             # print("Found:", key, value)
-            if key not in uses:
+            if (key not in uses):
                 uses[key] = (value, [f], [1])
             else:
-                if uses[key][0] != value:
+                if (uses[key][0] != value):
                     print("ERROR - string is not consistent for key:", key)
-                    print(
-                        "     First value:|{0}|, file:{1}".format(
-                            uses[key][0], uses[key][1][0]
-                        )
-                    )
-                    if uses[key][1][0] == f:
+                    print("     First value:|{0}|, file:{1}".format(uses[key][0], uses[key][1][0]))
+                    if (uses[key][1][0] == f):
                         print("     This value: |{0}|, same file".format(value))
                     else:
                         print("     This value: |{0}|, file:{1}".format(value, f))
                     print()
-                    if key not in errorList:
+                    if (key not in errorList):
                         errorList.append(key)
                 else:
                     files = uses[key][1]
@@ -136,7 +126,7 @@ def findTSUsages(fileList, uses, args):
                             found = True
                             times[i] += 1
                             break
-                    if not found:
+                    if (not found):
                         files.append(f)
                         times.append(1)
 
@@ -176,7 +166,7 @@ def findPythonFiles(baseDirs, skipDirs):
             for check in skipAbsDirs:
                 common = os.path.commonprefix([absRoot, check])
                 # print(absRoot, check, common, len(check), len(common))
-                if len(common) == len(check):
+                if (len(common) == len(check)):
                     skipRoot = True
                     break
             if skipRoot:
@@ -185,7 +175,7 @@ def findPythonFiles(baseDirs, skipDirs):
             # print(root, dirs, files)
             for f in files:
                 absFile = os.path.normpath(os.path.join(root, f))
-                if absFile in skipAbsFiles:
+                if (absFile in skipAbsFiles):
                     continue
                 if os.path.splitext(absFile)[1] == ".py":
                     pythonFiles.append(absFile)
@@ -208,39 +198,28 @@ def findPythonFiles(baseDirs, skipDirs):
 
 def ProcessCommandArgs(args):
     """Handle the command args and display usage if needed.
-    Note that the usage is in English as we don't necessarily
-    have the language file to use. Also, this will be run in
-    the server, which shouldn't make mistakes."""
+       Note that the usage is in English as we don't necessarily
+       have the language file to use. Also, this will be run in
+       the server, which shouldn't make mistakes."""
 
-    parser = argparse.ArgumentParser(
-        prog="TransStrings.py",
-        description="Utility to ensure consistent use of translatable strings (TS).",
-    )
+    parser = argparse.ArgumentParser(prog="TransStrings.py",
+                                     description="Utility to ensure consistent use of translatable strings (TS).")
     parser.add_argument("--version", action="version", version="%(prog)s 0.5")
-    parser.add_argument(
-        "-v",
-        action="count",
-        default=0,
-        help="More verbose output (can be used multiple times)",
-    )
+    parser.add_argument("-v", action="count", default=0,
+                        help="More verbose output (can be used multiple times)")
 
-    parser.add_argument(
-        "-s", action="append", default=[], help="Directories to be skipped"
-    )
+    parser.add_argument("-s", action="append", default=[],
+                        help="Directories to be skipped")
 
-    parser.add_argument(
-        "baseDir",
-        nargs="*",
-        default=["."],
-        help="Base dir(s) to recursively look in for python files",
-    )
+    parser.add_argument("baseDir", nargs='*', default=["."],
+                        help="Base dir(s) to recursively look in for python files")
 
     parsed = parser.parse_args(args)
 
     return parsed
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # print("Command line args - before parse:", sys.argv[1:])
     parsed = ProcessCommandArgs(sys.argv[1:])
     # print("Command line args - after parse:", parsed)

@@ -38,7 +38,6 @@ LOG = util.SimpleLog(use=True)
 
 INT_ERROR_RE = re.compile("internal error")
 
-
 def main(args):
 
     # Do the parsing first
@@ -46,37 +45,35 @@ def main(args):
     rtc = parser.Parse(args.srcPath.name, p)
     # LOG.log("PAR rtc:{:d}".format(rtc))
 
-    if rtc == 0:
+    if (rtc == 0):
         rtc = optimiser.Optimise(p)
         # LOG.log("OPT rtc:{:d}".format(rtc))
-        if rtc == 0:
+        if (rtc == 0):
             rtc, statements = compiler.Compile(p, args.compilerOpt)
             # LOG.log("COM rtc:{:d}".format(rtc))
 
-            if args.listing is not None:
+            if (args.listing is not None):
                 for s in statements:
                     args.listing.write(s + "\n")
                 args.listing.close()
 
-    if rtc == 0:
+    if (rtc == 0):
 
         # clear global memory
         hl_parser.reset_devices_and_locations()
         token_assembler.reset_tokens()
 
         # print(statements)
-        dBytes, dString, dType, version = token_assembler.assemble_lines(
-            statements, False
-        )
+        dBytes, dString, dType, version = token_assembler.assemble_lines(statements, False)
         # print("Size:", len(dBytes), len(dString), dType, version)
-        if len(dBytes) == 0 or dType == 0 or version == 0:
+        if (len(dBytes) == 0 or dType == 0 or version == 0):
             rtc = 1
         elif (not args.checkOnly) and (not args.nowav):
             versionNumber = (version[0] << 4) + version[1]
             versionString = chr(versionNumber) + chr(255 - versionNumber)
             # print(versionNumber, ord(versionString[0]), ord(versionString[1]), download_type)
 
-            if not args.nowav:
+            if (not args.nowav):
                 absSrcPath = os.path.abspath(args.srcPath.name)
                 path = os.path.dirname(absSrcPath)
                 a = audio.Output(path)
@@ -89,15 +86,13 @@ def main(args):
                 full_download_bytes.extend(dBytes)
                 # print(len(full_download_bytes))
 
-                LOG.log(
-                    "WAV size:{} ver:{} name:{}".format(
-                        len(full_download_bytes), versionNumber, a.GetWavPath()
-                    )
-                )
+                LOG.log("WAV size:{} ver:{} name:{}".format(len(full_download_bytes),
+                                                                      versionNumber,
+                                                                      a.GetWavPath()))
 
                 a.WriteWav(full_download_bytes)
 
-                if args.binary is not None:
+                if (args.binary is not None):
                     args.binary.write(full_download_str)
                     args.binary.close()
 
@@ -106,130 +101,66 @@ def main(args):
 
 def ProcessCommandArgs(args):
     """Handle the command args and display usage if needed.
-    Note that the usage is in English as we don't necessarily
-    have the language file to use. Also, this will be run in
-    the server, which shouldn't make mistakes."""
+       Note that the usage is in English as we don't necessarily
+       have the language file to use. Also, this will be run in
+       the server, which shouldn't make mistakes."""
 
     # shenanigans to ensure order of the elements for help text
-    outputChoices = (
-        ("json", io.SINK.JSON),
-        ("console", io.SINK.CONSOLE),
-        ("both", io.SINK.BOTH),
-        ("test", io.SINK.TEST),
-    )
+    outputChoices = (("json", io.SINK.JSON), ("console", io.SINK.CONSOLE),
+                     ("both", io.SINK.BOTH), ("test", io.SINK.TEST))
 
-    levelChoices = (
-        ("error", io.LEVEL.ERROR),
-        ("warn", io.LEVEL.WARN),
-        ("top", io.LEVEL.TOP),
-        ("info", io.LEVEL.INFO),
-        (
-            "verbose",
-            io.LEVEL.VERBOSE,
-        ),
-        ("debug", io.LEVEL.DEBUG),
-    )
+    levelChoices = (("error", io.LEVEL.ERROR), ("warn", io.LEVEL.WARN),
+                    ("top", io.LEVEL.TOP), ("info", io.LEVEL.INFO),
+                    ("verbose", io.LEVEL.VERBOSE,), ("debug", io.LEVEL.DEBUG))
 
     testChoices = ("pass", "fail")
 
     version = "1.2.11"
-    parser = argparse.ArgumentParser(
-        prog="EdPy.py",
-        description="Full Ed.Py compiler, version %s - from source to wav file."
-        % (version,),
-    )
-    parser.add_argument(
-        "langPath",
-        metavar="LANG",
-        type=argparse.FileType("r"),
-        help="Path to a language file",
-    )
-    parser.add_argument(
-        "srcPath",
-        metavar="SRC",
-        type=argparse.FileType("r"),
-        help="Path to the source to be compiled",
-    )
+    parser = argparse.ArgumentParser(prog="EdPy.py", description="Full Ed.Py compiler, version %s - from source to wav file." % (version,))
+    parser.add_argument("langPath", metavar="LANG", type=argparse.FileType('r'),
+                        help="Path to a language file")
+    parser.add_argument("srcPath", metavar="SRC", type=argparse.FileType('r'),
+                        help="Path to the source to be compiled")
     parser.add_argument("-v", action="version", version="%(prog)s " + version)
 
-    parser.add_argument(
-        "-c",
-        dest="checkOnly",
-        action="store_true",
-        help="Check syntax only, don't generate the WAV file",
-    )
+    parser.add_argument("-c", dest="checkOnly", action="store_true",
+                        help="Check syntax only, don't generate the WAV file")
 
-    parser.add_argument(
-        "-r",
-        dest="reraise",
-        action="store_true",
-        help="Reraise exceptions after being caught. Used for testing/debugging",
-    )
+    parser.add_argument("-r", dest="reraise", action="store_true",
+                        help="Reraise exceptions after being caught. Used for testing/debugging")
 
-    parser.add_argument(
-        "-s",
-        dest="compilerOpt",
-        action="store_false",
-        help="Disable compiler optimisations (and make downloads slower)",
-    )
+    parser.add_argument("-s", dest="compilerOpt", action="store_false",
+                        help="Disable compiler optimisations (and make downloads slower)")
 
-    parser.add_argument(
-        "-d",
-        dest="dump",
-        type=int,
-        default=0,
-        help="Debug info dumps at different times. Mask - "
-        + "0x01 after parse, 0x02 after optimiser, 0x04 after compiler, "
-        + "0x08 assembly list, 0x10 final binary",
-    )
+    parser.add_argument("-d", dest="dump", type=int, default=0,
+                        help="Debug info dumps at different times. Mask - " +
+                        "0x01 after parse, 0x02 after optimiser, 0x04 after compiler, " +
+                        "0x08 assembly list, 0x10 final binary")
 
     # parser.add_argument("-a", dest="saveAssembly", action="store_true",
     #                     help="save the assembly file and stop (no WAV file)")
 
-    parser.add_argument(
-        "-a",
-        dest="listing",
-        metavar="LISTING",
-        type=argparse.FileType("w"),
-        help="save the assembly list file",
-    )
+    parser.add_argument("-a", dest="listing", metavar="LISTING", type=argparse.FileType('w'),
+                        help="save the assembly list file")
 
-    parser.add_argument(
-        "-b",
-        dest="binary",
-        metavar="BINARY",
-        type=argparse.FileType("w"),
-        help="save the final binary file",
-    )
+    parser.add_argument("-b", dest="binary", metavar="BINARY", type=argparse.FileType('w'),
+                        help="save the final binary file")
 
-    parser.add_argument(
-        "-w", dest="nowav", action="store_true", help="don't output the wav file"
-    )
+    parser.add_argument("-w", dest="nowav", action="store_true",
+                        help="don't output the wav file")
 
     # TODO: Change defaults back to normal ones for web app
-    parser.add_argument(
-        "-o",
-        type=util.LowerStr,
-        default="json",  # default="console",
-        choices=list(zip(*outputChoices))[0],
-        help="Output location (default:%(default)s)",
-    )
-    parser.add_argument(
-        "-l",
-        type=util.LowerStr,
-        choices=list(zip(*levelChoices))[0],
-        default="warn",  # default="debug",
-        help="Output level (default:%(default)s). "
-        + "\nAll output from previous levels and this one will be generated",
-    )
+    parser.add_argument("-o", type=util.LowerStr, default="json",  # default="console",
+                        choices=list(zip(*outputChoices))[0],
+                        help="Output location (default:%(default)s)")
+    parser.add_argument("-l", type=util.LowerStr,
+                        choices=list(zip(*levelChoices))[0], default="warn",  # default="debug",
+                        help="Output level (default:%(default)s). " +
+                        "\nAll output from previous levels and this one will be generated")
 
-    parser.add_argument(
-        "-x",
-        type=util.LowerStr,
-        choices=testChoices,
-        help="Special tests. "
-        + "INSTEAD of doing normal processing, do the special test",
-    )
+    parser.add_argument("-x", type=util.LowerStr,
+                        choices=testChoices, help="Special tests. " +
+                        "INSTEAD of doing normal processing, do the special test")
 
     # print("Args:",  args)
     parsed = parser.parse_args(args)
@@ -246,7 +177,7 @@ def ProcessCommandArgs(args):
     return parsed
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     LOG.log("START - Cmd line:{}".format(sys.argv[1:]))
 
@@ -287,8 +218,8 @@ if __name__ == "__main__":
     totalOutput = ""
     totalProgram = []
     m = None
-    MAX_OUT_BYTES = 500 - 3
-    MAX_PRG_BYTES = 5000 - 3
+    MAX_OUT_BYTES = 500-3
+    MAX_PRG_BYTES = 5000-3
 
     try:
         output = io.Out.GetOutputAsString()
@@ -296,38 +227,39 @@ if __name__ == "__main__":
         m = INT_ERROR_RE.search(output)
 
         # limit the output sizes
-        if len(output) > MAX_OUT_BYTES:
+        if (len(output) > MAX_OUT_BYTES):
             totalOutput = "..." + output[-MAX_OUT_BYTES:]
         else:
             totalOutput = output
 
-        if m is not None:
+        if (m is not None):
             parsed.srcPath.seek(0)
             program = parsed.srcPath.readlines()
             print("Program", program)
             prevBytes = 0
             for line in program:
-                if len(line.strip()) == 0 or line.strip().startswith("#"):
+                if (len(line.strip())==0 or line.strip().startswith('#')):
                     totalProgram.append("")
                     # limiting the output so a bad program doesn't screw the log up
                     prevBytes += 5
                 else:
                     testLine = line.rstrip()
-                    testLen = len(testLine) + prevBytes
-                    if testLen > MAX_PRG_BYTES:
-                        allowedBytes = MAX_PRG_BYTES - testLen
-                        totalProgram.append(testLine[0:allowedBytes] + "...")
+                    testLen = len(testLine)+prevBytes
+                    if (testLen > MAX_PRG_BYTES):
+                        allowedBytes = MAX_PRG_BYTES-testLen
+                        totalProgram.append(testLine[0:allowedBytes]+"...")
                         break
                     else:
                         totalProgram.append(testLine)
                         prevBytes += len(testLine)
-                # print("Bytes:", prevBytes, len(totalProgram[-1]))
+                #print("Bytes:", prevBytes, len(totalProgram[-1]))
 
     except Exception as e:
         # if we fail, that's ok - but not good
         totalOutput += "LOG EXC:{}".format(e)
 
-    if m is not None:
+
+    if (m is not None):
         LOG.log("END rtc:{} INTERNAL ERROR output:|{}|\n".format(rtc, totalOutput))
         LOG.log("PRG {}".format(totalProgram))
     else:

@@ -48,12 +48,7 @@ More info: https://github.com/thonny/thonny-edison/""",
     python_requires=">=3.5",
     package_data={
         "thonnycontrib.edison": ["res/*"],
-        "thonnycontrib.backend.edison_backend": [
-            "EdPy/*.py",
-            "EdPy/*.json",
-            "EdPy/LICENSE",
-            "EdPy/lib/*.py",
-        ],
+        "thonnycontrib.backend.edison_backend": ["EdPy/*.py", "EdPy/*.json", "EdPy/LICENSE", "EdPy/lib/*.py"]
     },
     install_requires=requirements,
     py_modules=["Ed"],
