@@ -11,7 +11,7 @@ for line in open(os.path.join(setupdir, "requirements.txt"), encoding="UTF-8"):
 
 setup(
     name="thonny-edison",
-    version="1.0.0",
+    version="1.1.0b1",
     description="A plug-in which adds Edison robot support for Thonny",
     long_description="""Plug-in for Thonny which adds Edison robot support.
  
@@ -36,16 +36,16 @@ More info: https://github.com/thonny/thonny-edison/""",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Education",
         "Topic :: Software Development",
     ],
     keywords="IDE education programming robotics Edison",
     platforms=["Windows", "macOS", "Linux"],
-    python_requires=">=3.5",
+    python_requires=">=3.7",
     package_data={
         "thonnycontrib.edison": ["res/*"],
         "thonnycontrib.backend.edison_backend": ["EdPy/*.py", "EdPy/*.json", "EdPy/LICENSE", "EdPy/lib/*.py"]
