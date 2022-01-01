@@ -31,8 +31,8 @@ import os.path
 
 
 class Enum(object):
-    """ Provides a 'C'-like enumeration for python
-        e.g. ERRORS = Enum("OVERFLOW", "DIV_BY_ZERO")
+    """Provides a 'C'-like enumeration for python
+    e.g. ERRORS = Enum("OVERFLOW", "DIV_BY_ZERO")
     """
 
     def __init__(self, *keys):
@@ -46,13 +46,13 @@ class Enum(object):
 
 
 class Mask(object):
-    """ Provides a 'C'-like enumeration of mask values for python
-        (so values are powers of 2, so they can be orred together)
-        e.g. DUMP = Mask("PARSER", "OPTIMISER")
+    """Provides a 'C'-like enumeration of mask values for python
+    (so values are powers of 2, so they can be orred together)
+    e.g. DUMP = Mask("PARSER", "OPTIMISER")
     """
 
     def __init__(self, *keys):
-        values = [2**i for i in range(len(keys))]
+        values = [2 ** i for i in range(len(keys))]
         self.__dict__.update(zip(keys, values))
 
     def len(self):
@@ -64,8 +64,8 @@ class Mask(object):
 
 
 class SimpleLog(object):
-    """ Provide a VERY SIMPLE log of execution. Just start, and end with timestamps. So
-        if something crashes then should be able to see that it happened."""
+    """Provide a VERY SIMPLE log of execution. Just start, and end with timestamps. So
+    if something crashes then should be able to see that it happened."""
 
     def __init__(self, use=True, fileName="EdPy.log", maxBytes=2000000):
         self.fh = None
@@ -75,25 +75,25 @@ class SimpleLog(object):
         self.maxBytes = maxBytes
 
     def formatTimestamp(self, ts=None):
-        if (ts is None):
-            return datetime.datetime.now.isoformat(' ')
+        if ts is None:
+            return datetime.datetime.now.isoformat(" ")
         else:
-            return ts.isoformat(' ')
+            return ts.isoformat(" ")
 
     def formatDelta(self, delta):
         return "+{:d}.{:06d}s".format(delta.seconds, delta.microseconds)
 
     def open(self):
-        if (not self.use):
+        if not self.use:
             return
 
         # try to rename if it's too large. But if there is an error then just
         # continue on.
         try:
             # if there is an existing file then see if it's too large
-            if (os.path.exists(self.fileName)):
+            if os.path.exists(self.fileName):
                 bytes = os.path.getsize(self.fileName)
-                if (bytes >= self.maxBytes):
+                if bytes >= self.maxBytes:
                     os.rename(self.fileName, self.fileName + ".old")
         except:
             pass
@@ -105,25 +105,31 @@ class SimpleLog(object):
             self.fh = None
 
     def log(self, line):
-        if (not self.use):
+        if not self.use:
             return
 
-        if (self.fh is None):
+        if self.fh is None:
             self.open()
 
-        if (self.fh is not None):
+        if self.fh is not None:
             now = datetime.datetime.now()
             delta = now - self.start
-            print("{:s} dur:{:s} pid:{} msg:{:s}".format(self.formatTimestamp(now),
-                                                         self.formatDelta(delta),
-                                                         os.getpid(), line), file=self.fh)
+            print(
+                "{:s} dur:{:s} pid:{} msg:{:s}".format(
+                    self.formatTimestamp(now),
+                    self.formatDelta(delta),
+                    os.getpid(),
+                    line,
+                ),
+                file=self.fh,
+            )
             self.fh.flush()
 
     def close(self):
-        if (not self.use):
+        if not self.use:
             return
 
-        if (self.fh is not None):
+        if self.fh is not None:
             self.fh.close()
             self.fh = None
 
@@ -137,11 +143,12 @@ def CheckPythonVersion():
     ver = sys.version_info
 
     # Using version 2.0 access to version (instead of assuming 2.7 here)
-    if (ver < (2,7)):
+    if ver < (2, 7):
         rawText = "Python version must be 2.7 or greater,"
         rawText += " this Python version is %d.%d." % (ver[0], ver[1])
         print("FATAL: " + rawText, file=sys.stderr)
         sys.exit(1)
+
 
 # do this check on every import of util!
 CheckPythonVersion()

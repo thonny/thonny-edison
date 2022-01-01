@@ -32,12 +32,18 @@ inter1 = 0
 def readAndCalibrate(validationStep):
     global previousTracker, density0, density1, density2
     Ed.Drive(Ed.FORWARD_LEFT, 1, 20)
-    currentTracker = Ed.ReadModuleRegister16Bit(Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16)
+    currentTracker = Ed.ReadModuleRegister16Bit(
+        Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16
+    )
     if validationStep > 0:
         Ed.SendIRData(MESSAGE_CALIBRATE)  # \
-        Ed.SendIRData(MESSAGE_CALIBRATE)  # send three messages, because one message per 20 is lost
+        Ed.SendIRData(
+            MESSAGE_CALIBRATE
+        )  # send three messages, because one message per 20 is lost
         Ed.SendIRData(MESSAGE_CALIBRATE)  # /
-    if validationStep == 1:  # start from 1 (second calibration reading), we reduce the possibility of reading value from border
+    if (
+        validationStep == 1
+    ):  # start from 1 (second calibration reading), we reduce the possibility of reading value from border
         density0 = currentTracker
     elif validationStep == 2:
         density1 = currentTracker
@@ -61,7 +67,9 @@ def sendPlayMessage(previousColor, currentColor):
         message = MESSAGE_HIGH
     if previousColor > -1:
         Ed.SendIRData(message)  # \
-        Ed.SendIRData(message)  # send three messages, because one message per 20 is lost
+        Ed.SendIRData(
+            message
+        )  # send three messages, because one message per 20 is lost
         Ed.SendIRData(message)  # /
     Ed.TimeWait(slowingPause, Ed.TIME_MILLISECONDS)
     Ed.DriveRightMotor(Ed.FORWARD, 1, Ed.DISTANCE_UNLIMITED)
@@ -71,13 +79,15 @@ def sendPlayMessage(previousColor, currentColor):
 # - test if round button is pressed, than wait to triangle button is pressed
 # - test if triangle button is pressed, than change playing speed
 def testButton():
-    global slowingPause;
+    global slowingPause
     keypad = Ed.ReadKeypad()
     if keypad == Ed.KEYPAD_ROUND:
         Ed.WriteModuleRegister8Bit(Ed.MODULE_LEFT_LED, Ed.REG_LED_OUTPUT_8, 1)
         Ed.WriteModuleRegister8Bit(Ed.MODULE_RIGHT_LED, Ed.REG_LED_OUTPUT_8, 1)
         Ed.SendIRData(MESSAGE_PAUSE)  # \
-        Ed.SendIRData(MESSAGE_PAUSE)  # send three messages, because one message from 20 is lost
+        Ed.SendIRData(
+            MESSAGE_PAUSE
+        )  # send three messages, because one message from 20 is lost
         Ed.SendIRData(MESSAGE_PAUSE)  # /
         while Ed.ReadKeypad() != Ed.KEYPAD_TRIANGLE:
             pass
@@ -163,15 +173,21 @@ while True:
     if tracker < inter0:
         tracker = Ed.ReadModuleRegister16Bit(Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16)
         while tracker < inter0plus:
-            tracker = Ed.ReadModuleRegister16Bit(Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16)
+            tracker = Ed.ReadModuleRegister16Bit(
+                Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16
+            )
     elif tracker < inter1:
         tracker = Ed.ReadModuleRegister16Bit(Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16)
         while tracker > inter0minus and tracker < inter1plus:
-            tracker = Ed.ReadModuleRegister16Bit(Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16)
+            tracker = Ed.ReadModuleRegister16Bit(
+                Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16
+            )
     else:
         tracker = Ed.ReadModuleRegister16Bit(Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16)
         while tracker > inter1minus:
-            tracker = Ed.ReadModuleRegister16Bit(Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16)
+            tracker = Ed.ReadModuleRegister16Bit(
+                Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16
+            )
     Ed.TimeWait(10, Ed.TIME_MILLISECONDS)  # wait to move from border to full shade
     Ed.DriveRightMotor(Ed.STOP, 1, Ed.DISTANCE_UNLIMITED)
     tracker = Ed.ReadModuleRegister16Bit(Ed.MODULE_LINE_TRACKER, Ed.REG_LT_LEVEL_16)

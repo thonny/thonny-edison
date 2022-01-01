@@ -9,9 +9,9 @@ Ed.Tempo = Ed.TEMPO_MEDIUM
 
 # --------Your code below-----------
 # set the funtions Edison runs when obstacles are detected
-Ed.RegisterEventHandler(Ed.EVENT_OBSTACLE_AHEAD, 'detectForward')
-Ed.RegisterEventHandler(Ed.EVENT_OBSTACLE_LEFT, 'detectLeft')
-Ed.RegisterEventHandler(Ed.EVENT_OBSTACLE_RIGHT, 'detectRight')
+Ed.RegisterEventHandler(Ed.EVENT_OBSTACLE_AHEAD, "detectForward")
+Ed.RegisterEventHandler(Ed.EVENT_OBSTACLE_LEFT, "detectLeft")
+Ed.RegisterEventHandler(Ed.EVENT_OBSTACLE_RIGHT, "detectRight")
 
 # turn on the line tracker and the obstacle detection
 Ed.LineTrackerLed(Ed.ON)
@@ -52,6 +52,7 @@ def detectRight():
     Ed.Drive(Ed.FORWARD_RIGHT, Ed.SPEED_10, 30)
     Ed.Drive(Ed.FORWARD, Ed.SPEED_5, Ed.DISTANCE_UNLIMITED)
     Ed.RightLed(Ed.OFF)
+
 
 # To use this code with Edison Version 1:
 # change the version in the setup to Ed.EdisonVersion = Ed.V1

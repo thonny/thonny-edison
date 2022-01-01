@@ -53,6 +53,7 @@ if sys.version_info[0] == 2:
 else:
     i2b = lambda x: bytes([x])
 
+
 class Output(object):
     """Create a wav file"""
 
@@ -63,9 +64,9 @@ class Output(object):
             self.filename = nameOverride
             self.fileHandle = open(self.filename, "wb")
         else:
-            self.fileHandle = tempfile.NamedTemporaryFile(mode="wb",
-                                                          prefix="tok", suffix=".wav",
-                                                          dir=self.directory, delete=False)
+            self.fileHandle = tempfile.NamedTemporaryFile(
+                mode="wb", prefix="tok", suffix=".wav", dir=self.directory, delete=False
+            )
             self.filename = self.fileHandle.name
 
         self.sampleRate = 44100
@@ -75,13 +76,12 @@ class Output(object):
         self.downloadBytesBetweenPauses = 1536
         self.downloadPauseMsecs = 2000
 
-        if (PULSE_AUDIO):
+        if PULSE_AUDIO:
             self.audio_func = self.createAudioWithPulses
             self.silence_func = self.createSilenceWithPulses
         else:
             self.audio_func = self.createAudioRamping
             self.silence_func = self.createSilenceRamping
-
 
     def SetSampleRate(self, sampleRate):
         self.sampleRate = sampleRate
@@ -98,10 +98,16 @@ class Output(object):
         waveWriter.setcomptype("NONE", "")
 
         # now generate the test file
-        data = chr(255) + chr(0) + \
-            chr(128) + chr(128) + \
-            chr(0) + chr(255) + \
-            chr(128) + chr(128)
+        data = (
+            chr(255)
+            + chr(0)
+            + chr(128)
+            + chr(128)
+            + chr(0)
+            + chr(255)
+            + chr(128)
+            + chr(128)
+        )
         count = 2000
         while count > 0:
             waveWriter.writeframes(data)
@@ -136,14 +142,14 @@ class Output(object):
         waveWriter.writeframes(self.silence_func(1000, self.sampleRate))
 
         preamble = 0
-        while (preamble < self.samplesPerQuanta):
+        while preamble < self.samplesPerQuanta:
             waveWriter.writeframes(self.audio_func(0, self.sampleRate))
             preamble += 1
 
-        while (index < len(binString)):
-            if (pauseCount == self.downloadBytesBetweenPauses):
+        while index < len(binString):
+            if pauseCount == self.downloadBytesBetweenPauses:
                 preamble = 0
-                while (preamble < self.downloadPauseMsecs):
+                while preamble < self.downloadPauseMsecs:
                     waveWriter.writeframes(self.audio_func(0, self.sampleRate))
                     preamble += 1
                 pauseCount = 0
@@ -156,8 +162,8 @@ class Output(object):
             # now the actual data -- big endian or little endian
             mask = 1
             ones = 0
-            while (mask <= 0x80):
-                if (data & mask):
+            while mask <= 0x80:
+                if data & mask:
                     waveWriter.writeframes(self.audio_func(2, self.sampleRate))
                     ones += 1
                 else:
@@ -172,7 +178,7 @@ class Output(object):
 
         # added to end as well - to ensure entire data is played. - ## BBB
         preamble = 0
-        while (preamble < self.samplesPerQuanta):
+        while preamble < self.samplesPerQuanta:
             waveWriter.writeframes(self.audio_func(0, self.sampleRate))
             preamble += 1
 
@@ -189,7 +195,7 @@ class Output(object):
         # write nears
         data += self.ramp(0, 255, samples_per_quanta)
 
-        if (midQuantas > 0):
+        if midQuantas > 0:
             data += self.ramp(128, 128, midQuantas * samples_per_quanta)
 
         return data
@@ -231,7 +237,7 @@ class Output(object):
         # print "ramp", samples
         data = b""
 
-        if (samples < len(RAMP)):
+        if samples < len(RAMP):
             print("ERROR - audio transition is smaller then the ramp size")
             sys.exit(1)
 
@@ -239,7 +245,7 @@ class Output(object):
         diffRight = newRight - self.lastRight
         count = 0
 
-        while (count < len(RAMP)):
+        while count < len(RAMP):
             left = int(self.lastLeft + (diffLeft * RAMP[count] / 100))
             right = int(self.lastRight + (diffRight * RAMP[count] / 100))
             # print "Ramp %d/%d" % (left, right)
@@ -247,7 +253,7 @@ class Output(object):
 
             count += 1
 
-        while (count < samples):
+        while count < samples:
             # print "Stable %d/%d" % (newLeft, newRight)
             data += i2b(newLeft) + i2b(newRight)
             count += 1

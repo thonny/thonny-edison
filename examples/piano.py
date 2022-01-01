@@ -18,7 +18,9 @@ TONE_COUNT = 12
 density = Ed.List(12, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 interval = Ed.List(11, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
 #                     G6     A6     B6     C7     D7     E7     F7     G7     A7    B7    C8    R
-tones = Ed.List(12, [20408, 18181, 16202, 15289, 13622, 12135, 11457, 10207, 9090, 8099, 7644, 100])
+tones = Ed.List(
+    12, [20408, 18181, 16202, 15289, 13622, 12135, 11457, 10207, 9090, 8099, 7644, 100]
+)
 
 
 def scanAndPlayNewTone():
@@ -58,13 +60,13 @@ def scanAndPlayNewTone():
                 new_tone = 1
             else:
                 new_tone = 0
-    Ed.TimeWait(50, Ed.TIME_MILLISECONDS);
-    Ed.PlayTone(tones[new_tone], 30000);
+    Ed.TimeWait(50, Ed.TIME_MILLISECONDS)
+    Ed.PlayTone(tones[new_tone], 30000)
 
 
 def endOfCalibrationSound():
     # crrrrr
-    count = 0;
+    count = 0
     while count < 6:
         Ed.PlayTone(5000, 80)
         Ed.PlayTone(100, 50)
@@ -77,7 +79,7 @@ def calibrateTone():
         return
     tracker = Ed.ReadLineTracker()
     density[tone] = tracker
-    Ed.PlayTone(tones[tone], 300);
+    Ed.PlayTone(tones[tone], 300)
     tone = tone + 1
 
 
@@ -85,7 +87,7 @@ def calibrateTone():
 
 # calibration
 tone = 0
-Ed.RegisterEventHandler(Ed.EVENT_KEYPAD_TRIANGLE, "calibrateTone");
+Ed.RegisterEventHandler(Ed.EVENT_KEYPAD_TRIANGLE, "calibrateTone")
 while tone < TONE_COUNT:
     pass
 endOfCalibrationSound()
@@ -97,6 +99,6 @@ while int < TONE_COUNT - 1:
     int = int + 1
 
 # playing tones
-Ed.RegisterEventHandler(Ed.EVENT_KEYPAD_ROUND, "scanAndPlayNewTone");
+Ed.RegisterEventHandler(Ed.EVENT_KEYPAD_ROUND, "scanAndPlayNewTone")
 while True:
     pass
